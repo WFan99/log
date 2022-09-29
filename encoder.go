@@ -1,4 +1,4 @@
-package coolog
+package log
 
 type Encoder interface {
 	Encode(msg string, level Level, fields ...Field) []byte

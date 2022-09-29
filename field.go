@@ -1,4 +1,4 @@
-package coolog
+package log
 
 import "fmt"
 
