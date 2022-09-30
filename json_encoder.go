@@ -21,6 +21,7 @@ func (enc *JsonEncoder) Encode(msg string, level Level, fields ...Field) []byte 
 	enc.buffer.WriteByte(',')
 	enc.appendKey("message")
 	enc.appendString(msg)
+
 	for _, field := range fields {
 		enc.buffer.WriteByte(',')
 		field.AddTo(enc)

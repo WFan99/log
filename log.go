@@ -4,6 +4,7 @@ var defaultLogger *Logger
 
 func init() {
 	defaultLogger = NewDefaultLogger()
+	defaultLogger.addCallerSkip = 1
 }
 
 func Debug(msg string, fields ...Field) {

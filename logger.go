@@ -2,12 +2,15 @@ package log
 
 import (
 	"os"
+	"runtime"
+	"strconv"
 )
 
 type Logger struct {
-	stdout       bool
-	logLevel     AtomicLevel
-	asyncLoggers map[string]*AsyncLogger
+	stdout        bool
+	logLevel      AtomicLevel
+	addCallerSkip int
+	asyncLoggers  map[string]*AsyncLogger
 }
 
 func NewDefaultLogger() *Logger {
@@ -48,6 +51,10 @@ func (logger *Logger) StopAsyncLog() {
 func (logger *Logger) output(msg string, level Level, fields ...Field) {
 	if !logger.GetLogLevel().enableOutput(level) {
 		return
+	}
+	if _, file, line, ok := runtime.Caller(2 + logger.addCallerSkip); ok {
+		fileLine := file + ":" + strconv.Itoa(line)
+		fields = append(fields, String("file", fileLine))
 	}
 	enc := &JsonEncoder{}
 	bytes := enc.Encode(msg, level, fields...)

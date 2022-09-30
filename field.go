@@ -24,6 +24,14 @@ func Int(key string, value int) Field {
 	return Field{fieldType: IntType, key: key, numValue: int64(value)}
 }
 
+func Bool(key string, value bool) Field {
+	if value {
+		return Field{fieldType: StringType, key: key, strValue: "true"}
+	} else {
+		return Field{fieldType: StringType, key: key, strValue: "false"}
+	}
+}
+
 func ErrObj(err error) Field {
 	errStr := "nil"
 	if err != nil {
