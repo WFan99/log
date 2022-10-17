@@ -11,7 +11,7 @@ const (
 	ErrorLevel Level = 4
 )
 
-func (level Level) string() string {
+func (level Level) String() string {
 	switch level {
 	case DebugLevel:
 		return "DEBUG"

@@ -1,9 +1,10 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"runtime"
-	"strconv"
+	"time"
 )
 
 type Logger struct {
@@ -52,19 +53,29 @@ func (logger *Logger) output(msg string, level Level, fields ...Field) {
 	if !logger.GetLogLevel().enableOutput(level) {
 		return
 	}
+	entryCaller := EntryCaller{Defined: false}
 	if _, file, line, ok := runtime.Caller(2 + logger.addCallerSkip); ok {
-		fileLine := file + ":" + strconv.Itoa(line)
-		fields = append(fields, String("file", fileLine))
+		entryCaller.Defined = true
+		entryCaller.File = file
+		entryCaller.Line = line
 	}
-	enc := &JsonEncoder{}
-	bytes := enc.Encode(msg, level, fields...)
+	enc := getJsonEncoder()
+	entry := Entry{Level: level, Time: time.Now(), Message: msg, Caller: entryCaller}
+	buffer, err := enc.EncodeEntry(entry, fields)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v write error %v\n", entry.Time, err)
+		return
+	}
 	if logger.stdout {
-		os.Stdout.Write(bytes)
+		os.Stdout.Write(buffer.Bytes())
 	}
 	for _, al := range logger.asyncLoggers {
-		al.appendContent(&logContent{level: level, bytes: bytes})
+		if al.logLevel.get().enableOutput(entry.Level) {
+			al.appendBytes(buffer.Bytes())
+		}
 	}
-
+	putJsonEncoder(enc)
+	buffer.Free()
 }
 
 func (logger *Logger) Debug(msg string, fields ...Field) {

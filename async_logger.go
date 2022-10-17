@@ -114,13 +114,11 @@ func (al *AsyncLogger) rollFile(createFile bool) {
 	al.curWriteBytes = 0
 }
 
-func (al *AsyncLogger) appendContent(content *logContent) {
-	if content == nil {
+func (al *AsyncLogger) appendBytes(content []byte) {
+	if len(content) == 0 {
 		return
 	}
-	if al.logLevel.get().enableOutput(content.level) {
-		al.bufferChan <- content.bytes
-	}
+	al.bufferChan <- content
 }
 
 func (al *AsyncLogger) stop() {
